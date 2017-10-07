@@ -58,3 +58,97 @@ public class MainActivity extends Activity {
     }
 }
 
+
+
+package ImageToText;
+
+import java.io.File;
+import java.util.Scanner;
+import net.sourceforge.tess4j.*;
+
+public class TextIO {
+    
+    private String picture;
+    private int size;
+    private int capacity;
+    private String[] dates;
+    
+    public TextIO (String image) {
+        picture = image;
+        capacity = 100; 
+        size = 0;
+        dates =  new String[capacity];
+    }
+    
+    public String textFromImage(String imageName) {
+        String newPic = imageName;
+        String result = null;
+        File imageFile = new File(newPic);
+        ITesseract instance = new Tesseract();  // JNA Interface Mapping
+        // ITesseract instance = new Tesseract1(); // JNA Direct Mapping
+
+        try {
+            result = instance.doOCR(imageFile);
+            System.out.println(result);
+        } catch (TesseractException e) {
+            System.err.println(e.getMessage());
+        }
+        
+        return result;
+    }
+    public String[] textToArray() {
+        
+        Scanner myScanner = new Scanner(textFromImage(picture));
+        int i = 0;
+        while (myScanner.hasNext()) {
+            if (i < capacity) {
+                dates[i] = myScanner.next();
+                size++;
+                i++;
+            }
+            else {
+                expandCapacity();
+                dates[i] = myScanner.next();
+                size++;
+                i++;                
+            }
+        }
+        return dates;            
+        
+    }
+    private void expandCapacity() {
+
+        @SuppressWarnings("unchecked")
+        String[] newArray = (String[])new Object[this.capacity * 2];
+
+        for (int i = 0; i < this.capacity; i++) {
+            newArray[i] = this.dates[i];
+        }
+
+        this.dates = newArray;
+        this.capacity *= 2;
+    }
+    
+    public String[] getInfo(String[] array) {
+        String[] finalArray = new String[3];
+        for (int i = 0; i < array.length; i++) {
+            if (array[i].equals("Date") || array[i].equals("When")) {
+                finalArray[1] = array[i+1];                
+            }
+            if (array[i].equals("Location") || array[i].equals("Where ")) {
+                finalArray[2] = array[i+1];
+            }
+            
+        }
+        return finalArray;
+    }
+    
+            
+    
+    
+    
+    
+
+}
+
+
